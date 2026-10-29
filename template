@@ -1,0 +1,97 @@
+const textarea = document.getElementById('codeInput');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const sampleBtn = document.getElementById('sampleBtn');
+const riskLevelEl = document.getElementById('riskLevel');
+const riskScoreEl = document.getElementById('riskScore');
+const summaryEl = document.getElementById('summary');
+const findingsListEl = document.getElementById('findingsList');
+const recommendationsListEl = document.getElementById('recommendationsList');
+
+const sampleCode = `def login_user(request):
+    username = request.form['username']
+    password = 'admin123'
+    query = "SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'"
+    return db.execute(query)
+
+import os
+subprocess.run("ls -l " + user_input, shell=True)
+`;
+
+function renderFindings(findings) {
+    if (!findings || findings.length === 0) {
+        findingsListEl.innerHTML = '<li>No obvious issues detected in the provided sample.</li>';
+        return;
+    }
+
+    findingsListEl.innerHTML = findings.map((finding) => `
+        <li data-severity="${finding.severity}">
+            <div class="finding-top">
+                <strong>${finding.title}</strong>
+                <span class="severity-tag">${finding.severity}</span>
+            </div>
+            <div>${finding.description}</div>
+            <div>Line ${finding.line}</div>
+            <div class="code-snippet">${escapeHtml(finding.snippet)}</div>
+        </li>
+    `).join('');
+}
+
+function renderRecommendations(recommendations) {
+    recommendationsListEl.innerHTML = recommendations.map((item) => `<li>${item}</li>`).join('');
+}
+
+function escapeHtml(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+async function analyzeCode() {
+    const code = textarea.value;
+    riskLevelEl.textContent = 'Analyzing...';
+    riskScoreEl.textContent = '...';
+    summaryEl.textContent = 'Running local security checks...';
+
+    try {
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+        });
+
+        const data = await response.json();
+
+        riskLevelEl.textContent = data.risk_level || 'Unknown';
+        riskScoreEl.textContent = String(data.risk_score || 0);
+        summaryEl.textContent = data.summary || 'No summary returned.';
+        renderFindings(data.findings || []);
+        renderRecommendations(data.recommendations || []);
+    } catch (error) {
+        summaryEl.textContent = 'There was a problem analyzing the code.';
+        findingsListEl.innerHTML = '<li>Unable to complete the security review.</li>';
+        recommendationsListEl.innerHTML = '<li>Please try again with a shorter snippet.</li>';
+        riskLevelEl.textContent = 'Error';
+        riskScoreEl.textContent = '0';
+        console.error(error);
+    }
+}
+
+analyzeBtn.addEventListener('click', analyzeCode);
+sampleBtn.addEventListener('click', () => {
+    textarea.value = sampleCode;
+    analyzeCode();
+});
+
+textarea.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        analyzeCode();
+    }
+});
+
+ttextarea.value = sampleCode;
+analyzeCode();

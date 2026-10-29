@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Security Analyst</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Security tooling</p>
+          <h1>AI Security Analyst</h1>
+        </div>
+        <div class="badge">Rule-based scanner</div>
+      </header>
+
+      <main class="layout">
+        <section class="panel input-panel">
+          <label for="codeInput">Paste code or a suspicious snippet</label>
+          <textarea id="codeInput" placeholder="def login(username):\n    password = 'admin123'\n    query = \"SELECT * FROM users WHERE user='\" + username + \"'\n    return execute(query)"></textarea>
+          <div class="button-row">
+            <button id="analyzeBtn">Analyze</button>
+            <button id="sampleBtn" class="secondary">Load sample</button>
+          </div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="result-header">
+            <div>
+              <p class="eyebrow">Assessment</p>
+              <h2 id="riskLevel">Awaiting analysis</h2>
+            </div>
+            <div class="score-box">
+              <span>Risk score</span>
+              <strong id="riskScore">0</strong>
+            </div>
+          </div>
+
+          <p id="summary" class="summary">Paste code to begin a security review.</p>
+
+          <div class="section">
+            <h3>Findings</h3>
+            <ul id="findingsList" class="findings-list"></ul>
+          </div>
+
+          <div class="section">
+            <h3>Recommendations</h3>
+            <ul id="recommendationsList" class="recommendations-list"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
